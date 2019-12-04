@@ -8,7 +8,7 @@ import app from "../app.mjs";
 import debugLib from "debug";
 import http from "http";
 
-const debug = debugLib("backend:server");
+const debug = debugLib("streaming.service:server");
 /**
  * Get port from environment and store in Express.
  */
