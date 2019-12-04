@@ -1,0 +1,27 @@
+{
+  "title": "Forever Young",
+  "state": {
+    "user": {
+      "gender": null
+    },
+    "mouse": {
+      "down": false,
+      "click": false,
+      "up": false,
+      "move": false,
+      "over": false,
+      "out": false,
+      "wheel": false
+    },
+    "window": {
+      "inner": null,
+      "outer": null
+    }
+  },
+  "router": {
+    "pathname": "/",
+    "search": "",
+    "queries": {},
+    "hash": ""
+  }
+}
