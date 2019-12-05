@@ -86,12 +86,6 @@ export async function createQualityVersion(
   return true;
 }
 
-createQualityVersion(
-  availableQualities["360p"],
-  "res/videos/series/pl/naruto/season_3/naruto_boruto_134.mp4",
-  "res/videos/series/pl/naruto/season_3/naruto_boruto_134-360p.mp4"
-);
-
 function containsIllegalCrawlingErrors(
   object = { name: __project_path },
   ...optionalParams
