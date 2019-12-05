@@ -82,6 +82,7 @@ export async function createQualityVersion(
     if (err.code === 103) {
       console.log("Starting ffmpeg installation process...");
       installFFMPEG("Please reboot your computer");
+      System.exit(1);
     }
     return false;
   }
