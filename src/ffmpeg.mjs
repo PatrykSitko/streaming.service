@@ -83,7 +83,6 @@ export async function createQualityVersion(
     }
     return false;
   }
-  console.log("success");
   return true;
 }
 
