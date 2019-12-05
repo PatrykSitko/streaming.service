@@ -69,7 +69,7 @@ export function installFFMPEG() {
 function continueOnInput() {
   console.log("Press any key to continue...");
   stdin.on("data", () => {
-    process.exit();
+    stdin.destroy();
   });
 }
 function askToReboot() {
@@ -78,7 +78,7 @@ function askToReboot() {
   let choosenOption = false;
   stdin.on("data", key => {
     if (key && choosenOption) {
-      process.exit();
+      stdin.destroy();
     }
     console.log(key);
     if (key.toLowerCase() === "y" && !choosenOption) {
@@ -139,7 +139,7 @@ async function addFfmpegPathEntry() {
           askToReboot();
         }
       }
-      // continueOnInput();
+      continueOnInput();
     }
   } catch (err) {
     console.error(err);
