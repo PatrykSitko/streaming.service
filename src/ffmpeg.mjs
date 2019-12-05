@@ -52,14 +52,45 @@ export const availableQualities = Object.freeze({
  * @param {Object} availableQualities use exported availableQualities object from ffmpeg.mjs.
  * @param {String} inputfile file location has to be relatieve to project path.
  * @param {String} outputFile file location has to be relatieve to project path.
- * @returns Promise containing: true if created requested quality version; false if error occured;
+ * @returns Promise containing: 
+ * 
+ *
+   if created requested quality version:
+ * 
+ * Object{
+      success: true,
+      inputfile:string,
+      outputFile:string,
+      choosenQuality:string
+    }   
+ * 
+   if error occured;
+ *
+    Object{
+      success: false,
+      inputfile:string,
+      outputFile:string,
+      choosenQuality:string
+    }
  */
-export async function createQualityVersion(
-  availableQualities,
+export async function createQualityVersion({
+  availableQualities: choosenQuality,
   inputfile,
   outputFile
-) {
-  const choosenQuality = availableQualities;
+}) {
+  let choosenQualityDescriptor = "unknown";
+  for (let quality in availableQualities) {
+    const current = availableQualities[quality];
+    console.log();
+    if (
+      Object.keys(current).toString() + Object.values(current).toString() ===
+      Object.keys(choosenQuality).toString() +
+        Object.values(choosenQuality).toString()
+    ) {
+      choosenQualityDescriptor = quality;
+      break;
+    }
+  }
   const inputfileLocation = path.join(__project_path, inputfile);
   const outputFileLocation = path.join(__project_path, outputFile);
   if (
@@ -68,7 +99,12 @@ export async function createQualityVersion(
       { outputfile: outputFileLocation }
     )
   ) {
-    return false;
+    return {
+      success: false,
+      inputfile,
+      outputFile,
+      choosenQuality: choosenQualityDescriptor
+    };
   }
   try {
     const ffmpegVideo = await new ffmpeg(inputfile);
@@ -81,9 +117,19 @@ export async function createQualityVersion(
     if (err.code === 1) {
       installFFMPEG();
     }
-    return false;
+    return {
+      success: false,
+      inputfile,
+      outputFile,
+      choosenQuality: choosenQualityDescriptor
+    };
   }
-  return true;
+  return {
+    success: true,
+    inputfile,
+    outputFile,
+    choosenQuality: choosenQualityDescriptor
+  };
 }
 
 function containsIllegalCrawlingErrors(
