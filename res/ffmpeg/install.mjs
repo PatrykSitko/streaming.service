@@ -60,16 +60,20 @@ export function installFFMPEG() {
     }
     if (key.toLowerCase() === "n" && !choosenOption) {
       choosenOption = true;
-      console.log("Missing ffmpeg. Exiting System with code 1.");
-      continueOnInput();
+      console.log("Missing ffmpeg. Exiting process with code 1.");
+      continueOnInput(1);
     }
   });
 }
 
-function continueOnInput() {
+function continueOnInput(exitcode = undefined) {
   console.log("Press any key to continue...");
   stdin.on("data", () => {
-    stdin.destroy();
+    if (typeof exitcode === "number" && exitcode === 1) {
+      process.exit(1);
+    } else {
+      stdin.destroy();
+    }
   });
 }
 function askToReboot() {
