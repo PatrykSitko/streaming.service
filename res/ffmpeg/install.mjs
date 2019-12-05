@@ -145,4 +145,3 @@ async function addFfmpegPathEntry() {
     console.error(err);
   }
 }
-installFFMPEG();
