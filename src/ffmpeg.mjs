@@ -1,8 +1,11 @@
+import util from "util";
 import ffmpeg from "ffmpeg";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { installFFMPEG } from "../res/ffmpeg/install.mjs";
+import child_process from "child_process";
 
+const exec = util.promisify(child_process.exec);
 const __project_path = path.join(
   dirname(fileURLToPath(import.meta.url)),
   "../"
@@ -47,9 +50,14 @@ export const availableQualities = Object.freeze({
   })
 });
 
+createQualityVersion(
+  availableQualities["360p"],
+  "res/video.mp4",
+  "res/video_converted.mp4"
+).then(console.log);
 /**
  *
- * @param {Object} __availableQualities__ use exported availableQualities object from ffmpeg.mjs.
+ * @param {Object} availableQualities_ use exported availableQualities object from ffmpeg.mjs.
  * @param {String} inputfile file location has to be relatieve to project path.
  * @param {String} outputFile file location has to be relatieve to project path.
  * @returns Promise containing: 
@@ -74,15 +82,14 @@ export const availableQualities = Object.freeze({
     }
  */
 export async function createQualityVersion(
-  __availableQualities__,
+  availableQualities_,
   inputfile,
   outputFile
 ) {
-  const choosenQuality = __availableQualities__;
+  const choosenQuality = availableQualities_;
   let choosenQualityDescriptor = "unknown";
   for (let quality in availableQualities) {
     const current = availableQualities[quality];
-    console.log();
     if (
       Object.keys(current).toString() + Object.values(current).toString() ===
       Object.keys(choosenQuality).toString() +
@@ -112,11 +119,20 @@ export async function createQualityVersion(
     Object.entries(choosenQuality).forEach(([command, argument]) =>
       ffmpegVideo.addCommand(command, argument)
     );
-    await ffmpegVideo.save(outputFileLocation);
+    await ffmpegVideo.save(`"${outputFileLocation}"`);
   } catch (err) {
-    console.log(err);
-    if (err.code === 1) {
-      installFFMPEG();
+    try {
+      await exec("ffmpeg");
+    } catch ({ stderr }) {
+      const message =
+        "'ffmpeg' is not recognized as an internal or external command,\r\n" +
+        "operable program or batch file.\r\n";
+      if (stderr === message) {
+        console.log(message);
+        installFFMPEG();
+      } else {
+        console.error(err);
+      }
     }
     return {
       success: false,
@@ -145,15 +161,13 @@ function containsIllegalCrawlingErrors(
     }
   }
   try {
-    Object.values(arguments)
-      .flat(Infinity)
-      .forEach(arg =>
-        Object.entries(arg).forEach(([name, value]) => {
-          if (!value.startsWith(__project_path)) {
-            throw new IllegalCrawlingError(name);
-          }
-        })
-      );
+    Object.values(arguments).forEach(arg =>
+      Object.entries(arg).forEach(([name, value]) => {
+        if (!value.startsWith(__project_path)) {
+          throw new IllegalCrawlingError(name);
+        }
+      })
+    );
   } catch (illegalCrawlingError) {
     console.error(illegalCrawlingError);
     return true;
