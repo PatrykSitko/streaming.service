@@ -6,8 +6,10 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 
-import indexRouter from "./routes/index.mjs";
-import usersRouter from "./routes/users.mjs";
+import indexRouter from "./src/routes/index.mjs";
+import usersRouter from "./src/routes/users.mjs";
+import moviesRouter from "./src/routes/movies.mjs";
+import seriesRouter from "./src/routes/series.mjs";
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -21,5 +23,7 @@ app.use(express.static(path.join(__dirname, "client/build")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/series", seriesRouter);
+app.use("/movies", moviesRouter);
 
 export default app;
