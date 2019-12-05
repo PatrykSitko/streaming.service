@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "streaming-service",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,9 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "ffmpeg": "^0.0.4",
     "morgan": "~1.9.1",
+    "mp4box": "^0.3.20",
     "nodemon": "^2.0.1"
   }
 }
