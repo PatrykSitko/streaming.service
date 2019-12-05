@@ -49,7 +49,7 @@ export const availableQualities = Object.freeze({
 
 /**
  *
- * @param {Object} availableQualities use exported availableQualities object from ffmpeg.mjs.
+ * @param {Object} __availableQualities__ use exported availableQualities object from ffmpeg.mjs.
  * @param {String} inputfile file location has to be relatieve to project path.
  * @param {String} outputFile file location has to be relatieve to project path.
  * @returns Promise containing: 
@@ -73,11 +73,12 @@ export const availableQualities = Object.freeze({
       choosenQuality:string
     }
  */
-export async function createQualityVersion({
-  availableQualities: choosenQuality,
+export async function createQualityVersion(
+  __availableQualities__,
   inputfile,
   outputFile
-}) {
+) {
+  const choosenQuality = __availableQualities__;
   let choosenQualityDescriptor = "unknown";
   for (let quality in availableQualities) {
     const current = availableQualities[quality];
