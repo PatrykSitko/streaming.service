@@ -59,6 +59,7 @@ export async function createQualityVersion(
   inputfile,
   outputFile
 ) {
+  const choosenQuality = availableQualities;
   const inputfileLocation = path.join(__project_path, inputfile);
   const outputFileLocation = path.join(__project_path, outputFile);
   if (
@@ -71,18 +72,14 @@ export async function createQualityVersion(
   }
   try {
     const ffmpegVideo = await new ffmpeg(inputfile);
-    Object.entries(availableQualities).forEach(([command, argument]) =>
+    Object.entries(choosenQuality).forEach(([command, argument]) =>
       ffmpegVideo.addCommand(command, argument)
     );
-    console.log("awaiting save");
     await ffmpegVideo.save(outputFileLocation);
-    console.log("awaited save");
   } catch (err) {
     console.log(err);
     if (err.code === 1) {
-      console.log("Starting ffmpeg installation process...");
-      installFFMPEG("Please reboot your computer");
-      System.exit(1);
+      installFFMPEG();
     }
     return false;
   }
