@@ -11,7 +11,7 @@ const __project_path = path.join(
 
 export default Ffmpeg;
 
-export const installFFMPEG =  InstallFFMPEG;
+export const installFFMPEG = InstallFFMPEG;
 
 export const availableQualities = Object.freeze({
   "720p": Object.freeze({
@@ -55,18 +55,18 @@ export const availableQualities = Object.freeze({
 /**
  * @returns {Boolean} true if ffmpeg is installed; else false;
  */
-export function IsFfmpegInstalled(){
+export async function isFfmpegInstalled() {
   try {
-  await fs.exec("ffmpeg");
-} catch ({ stderr }) {
-  const message =
-    "'ffmpeg' is not recognized as an internal or external command,\r\n" +
-    "operable program or batch file.\r\n";
-  if (stderr === message) {
-    return false;
+    await fs.exec("ffmpeg");
+  } catch ({ stderr }) {
+    const message =
+      "'ffmpeg' is not recognized as an internal or external command,\r\n" +
+      "operable program or batch file.\r\n";
+    if (stderr === message) {
+      return false;
+    }
   }
-}
-return true;
+  return true;
 }
 
 // createQualityVersion(
@@ -146,12 +146,14 @@ export async function createQualityVersion(
     );
     await ffmpegVideo.save(`"${outputFileLocation}"`);
   } catch (err) {
-    if(!isFfmpegInstalled()){
-      console.log("'ffmpeg' is not recognized as an internal or external command,\r\n" +
-      "operable program or batch file.\r\n");
+    if (!isFfmpegInstalled()) {
+      console.log(
+        "'ffmpeg' is not recognized as an internal or external command,\r\n" +
+          "operable program or batch file.\r\n"
+      );
       installFFMPEG();
-    }else {
-      console.error(err)
+    } else {
+      console.error(err);
     }
     return {
       success: false,
