@@ -110,7 +110,9 @@ export async function createQualityVersion(
     return {
       success: false,
       inputfile,
+      inputfileLocation,
       outputFile,
+      outputFileLocation,
       choosenQuality: choosenQualityDescriptor
     };
   }
@@ -137,14 +139,18 @@ export async function createQualityVersion(
     return {
       success: false,
       inputfile,
+      inputfileLocation,
       outputFile,
+      outputFileLocation,
       choosenQuality: choosenQualityDescriptor
     };
   }
   return {
     success: true,
     inputfile,
+    inputfileLocation,
     outputFile,
+    outputFileLocation,
     choosenQuality: choosenQualityDescriptor
   };
 }
