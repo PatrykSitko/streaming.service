@@ -1,7 +1,4 @@
-import util from "util";
-import child_process from "child_process";
-
-const exec = util.promisify(child_process.exec);
+import fs from "./customFS.mjs";
 
 function getStdin() {
   const stdin = process.stdin;
@@ -41,7 +38,7 @@ export function askToReboot(isRequired = true) {
       if (key.toLowerCase() === "y") {
         (async () => {
           console.log("Will be rebooting your computer shortly...");
-          const { stdout } = await exec("shutdown /r");
+          const { stdout } = await fs.exec("shutdown /r");
           console.log(stdout);
         })();
         resolve(true);

@@ -1,11 +1,9 @@
-import util from "util";
 import Ffmpeg from "ffmpeg";
+import fs from "./customFS.mjs";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { installFFMPEG as InstallFFMPEG } from "../res/ffmpeg/install.mjs";
-import child_process from "child_process";
 
-const exec = util.promisify(child_process.exec);
 const __project_path = path.join(
   dirname(fileURLToPath(import.meta.url)),
   "../"
@@ -59,7 +57,7 @@ export const availableQualities = Object.freeze({
  */
 export function IsFfmpegInstalled(){
   try {
-  await exec("ffmpeg");
+  await fs.exec("ffmpeg");
 } catch ({ stderr }) {
   const message =
     "'ffmpeg' is not recognized as an internal or external command,\r\n" +
