@@ -1,5 +1,5 @@
 import util from "util";
-import ffmpeg from "ffmpeg";
+import Ffmpeg from "ffmpeg";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { installFFMPEG } from "../res/ffmpeg/install.mjs";
@@ -10,6 +10,8 @@ const __project_path = path.join(
   dirname(fileURLToPath(import.meta.url)),
   "../"
 );
+
+export default Ffmpeg;
 
 export const availableQualities = Object.freeze({
   "720p": Object.freeze({
@@ -49,6 +51,23 @@ export const availableQualities = Object.freeze({
     "-vf": "scale=-1:360"
   })
 });
+
+/**
+ * @returns {Boolean} true if ffmpeg is installed; else false;
+ */
+export function IsFfmpegInstalled(){
+  try {
+  await exec("ffmpeg");
+} catch ({ stderr }) {
+  const message =
+    "'ffmpeg' is not recognized as an internal or external command,\r\n" +
+    "operable program or batch file.\r\n";
+  if (stderr === message) {
+    return false;
+  }
+}
+return true;
+}
 
 // createQualityVersion(
 //   availableQualities["360p"],
@@ -121,24 +140,18 @@ export async function createQualityVersion(
     };
   }
   try {
-    const ffmpegVideo = await new ffmpeg(inputfileLocation);
+    const ffmpegVideo = await new Ffmpeg(inputfileLocation);
     Object.entries(choosenQuality).forEach(([command, argument]) =>
       ffmpegVideo.addCommand(command, argument)
     );
     await ffmpegVideo.save(`"${outputFileLocation}"`);
   } catch (err) {
-    try {
-      await exec("ffmpeg");
-    } catch ({ stderr }) {
-      const message =
-        "'ffmpeg' is not recognized as an internal or external command,\r\n" +
-        "operable program or batch file.\r\n";
-      if (stderr === message) {
-        console.log(message);
-        installFFMPEG();
-      } else {
-        console.error(err);
-      }
+    if(!isFfmpegInstalled()){
+      console.log("'ffmpeg' is not recognized as an internal or external command,\r\n" +
+      "operable program or batch file.\r\n");
+      installFFMPEG();
+    }else {
+      console.error(err)
     }
     return {
       success: false,
