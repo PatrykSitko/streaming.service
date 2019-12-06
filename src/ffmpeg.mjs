@@ -2,7 +2,7 @@ import util from "util";
 import Ffmpeg from "ffmpeg";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import { installFFMPEG } from "../res/ffmpeg/install.mjs";
+import { installFFMPEG as InstallFFMPEG } from "../res/ffmpeg/install.mjs";
 import child_process from "child_process";
 
 const exec = util.promisify(child_process.exec);
@@ -12,6 +12,8 @@ const __project_path = path.join(
 );
 
 export default Ffmpeg;
+
+export const installFFMPEG =  InstallFFMPEG;
 
 export const availableQualities = Object.freeze({
   "720p": Object.freeze({
