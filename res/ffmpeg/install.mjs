@@ -1,7 +1,7 @@
-import fs from "fs";
+import fs from "../../src/customFS.mjs";
 import util from "util";
 import { fileURLToPath } from "url";
-import path, { dirname } from "path";
+import { dirname } from "path";
 import child_process from "child_process";
 
 const homeDir = process.env.HOMEDRIVE + process.env.HOMEPATH;
@@ -10,42 +10,6 @@ const exec = util.promisify(child_process.exec);
 const stdin = process.stdin;
 stdin.setRawMode(true);
 stdin.setEncoding("UTF-8");
-
-function copyFileSync(source, target) {
-  let targetFile = target;
-
-  //if target is a directory a new file with the same name will be created
-  if (fs.existsSync(target)) {
-    if (fs.lstatSync(target).isDirectory()) {
-      targetFile = path.join(target, path.basename(source));
-    }
-  }
-
-  fs.writeFileSync(targetFile, fs.readFileSync(source));
-}
-
-function copyFolderRecursiveSync(source, target) {
-  let files = [];
-
-  //check if folder needs to be created or integrated
-  const targetFolder = path.join(target, path.basename(source));
-  if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder);
-  }
-
-  //copy
-  if (fs.lstatSync(source).isDirectory()) {
-    files = fs.readdirSync(source);
-    files.forEach(function(file) {
-      const curSource = path.join(source, file);
-      if (fs.lstatSync(curSource).isDirectory()) {
-        copyFolderRecursiveSync(curSource, targetFolder);
-      } else {
-        copyFileSync(curSource, targetFolder);
-      }
-    });
-  }
-}
 
 export function installFFMPEG() {
   console.log("Do you want to start the ffmpeg installation process?");
@@ -104,7 +68,7 @@ function copyFfmpegToHomeDir() {
   console.log(
     `Copying files and directories from: "${__dirname}\\**" to: "${homeDir}\\ffmpeg"`
   );
-  copyFolderRecursiveSync(__dirname, homeDir);
+  fs.copyFolderRecursiveSync(__dirname, homeDir);
   console.log(
     `Finnished copying files and directories from: "${__dirname}\\**" to: "${homeDir}\\ffmpeg"`
   );
