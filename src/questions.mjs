@@ -15,13 +15,18 @@ export function yesNoQuestion(question = "") {
     console.log(question);
     console.log("yes/no");
     const stdin = getStdin();
+    let choosenOption = false;
     stdin.on("data", async key => {
-      console.log(key);
-      if (key.toLowerCase() === "y") {
+      if (!choosenOption) {
+        console.log(key);
+      }
+      if (key.toLowerCase() === "y" && !choosenOption) {
+        choosenOption = true;
         resolve(true);
         stdin.pause();
       }
-      if (key.toLowerCase() === "n") {
+      if (key.toLowerCase() === "n" && !choosenOption) {
+        choosenOption = true;
         resolve(false);
         stdin.pause();
       }
@@ -33,9 +38,13 @@ export function askToReboot(isRequired = true) {
     console.log(`Do you want to reboot?${isRequired ? " (required)" : ""}`);
     console.log("yes/no");
     const stdin = getStdin();
+    let choosenOption = false;
     stdin.on("data", key => {
-      console.log(key);
-      if (key.toLowerCase() === "y") {
+      if (!choosenOption) {
+        console.log(key);
+      }
+      if (key.toLowerCase() === "y" && !choosenOption) {
+        choosenOption = true;
         (async () => {
           console.log("Will be rebooting your computer shortly...");
           const { stdout } = await fs.exec("shutdown /r");
@@ -44,7 +53,8 @@ export function askToReboot(isRequired = true) {
         resolve(true);
         stdin.pause();
       }
-      if (key.toLowerCase() === "n") {
+      if (key.toLowerCase() === "n" && !choosenOption) {
+        choosenOption = true;
         console.log("Please reboot your computer.");
         resolve(false);
         stdin.pause();
