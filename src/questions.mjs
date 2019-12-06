@@ -1,3 +1,8 @@
+import util from "util";
+import child_process from "child_process";
+
+const exec = util.promisify(child_process.exec);
+
 function getStdin() {
   const stdin = process.stdin;
   stdin.setRawMode(true);
@@ -28,7 +33,7 @@ export function yesNoQuestion(question = "") {
 }
 export function askToReboot(isRequired = true) {
   return new Promise(resolve => {
-    console.log("Do you want to reboot?" + isRequired ? " (required)" : "");
+    console.log(`Do you want to reboot?${isRequired ? " (required)" : ""}`);
     console.log("yes/no");
     const stdin = getStdin();
     stdin.on("data", key => {
