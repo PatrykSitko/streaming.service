@@ -3,7 +3,6 @@ import util from "util";
 import path from "path";
 import question from "./questions.mjs";
 import child_process from "child_process";
-import { resolve } from "dns";
 
 const exec = util.promisify(child_process.exec);
 
@@ -42,6 +41,23 @@ function copyFolderRecursiveSync(source, target) {
     });
   }
 }
+/**
+ * @returns {Boolean} true if command is available; else false;
+ */
+async function isCommandAvailable(command) {
+  try {
+    await fs.exec(command);
+  } catch ({ stderr }) {
+    if (
+      stderr ===
+      `'${command}' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n`
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  *
  * @param newPathEntry The path entry you would like to add to the local user environment variables.
@@ -105,6 +121,7 @@ export default {
   exec,
   copyFileSync,
   copyFolderRecursiveSync,
+  isCommandAvailable,
   addUserPathEntry,
   getFileName
 };
