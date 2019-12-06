@@ -50,11 +50,11 @@ export const availableQualities = Object.freeze({
   })
 });
 
-createQualityVersion(
-  availableQualities["360p"],
-  "res/video.mp4",
-  "res/video_converted.mp4"
-).then(console.log);
+// createQualityVersion(
+//   availableQualities["360p"],
+//   "res/video.mp4",
+//   "res/video-360p.mp4"
+// ).then(console.log);
 /**
  *
  * @param {Object} availableQualities_ use exported availableQualities object from ffmpeg.mjs.
