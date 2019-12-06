@@ -1,25 +1,8 @@
 import fs from "./customFS.mjs";
 import { installPackager as InstallPackager } from "../res/packager/install.mjs";
-import Ffmpeg, { isFfmpegInstalled, installFFMPEG } from "./ffmpeg.mjs";
+import Ffmpeg, { installFFMPEG } from "./ffmpeg.mjs";
 
 export const installPackager = InstallPackager;
-
-/**
- * @returns {Boolean} true if packager is installed; else false;
- */
-export async function isPackagerInstalled() {
-  try {
-    await fs.exec("packager-win");
-  } catch ({ stderr }) {
-    const message =
-      "'packager-win' is not recognized as an internal or external command,\r\n" +
-      "operable program or batch file.\r\n";
-    if (stderr === message) {
-      return false;
-    }
-  }
-  return true;
-}
 
 class Packager {
   constructor(verbose = false) {
@@ -82,10 +65,10 @@ class Packager {
   }
 
   async save(destination) {
-    if (!(await isFfmpegInstalled())) {
+    if (!(await fs.isCommandAvailable("ffmpeg"))) {
       await installFFMPEG();
     }
-    if (!(await isPackagerInstalled())) {
+    if (!(await fs.isCommandAvailable("packager-win"))) {
       await installPackager();
     }
     console.log(this.inputs);
