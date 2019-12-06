@@ -117,7 +117,7 @@ export async function createQualityVersion(
     };
   }
   try {
-    const ffmpegVideo = await new ffmpeg(inputfile);
+    const ffmpegVideo = await new ffmpeg(`"${inputfileLocation}"`);
     Object.entries(choosenQuality).forEach(([command, argument]) =>
       ffmpegVideo.addCommand(command, argument)
     );
