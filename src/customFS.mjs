@@ -84,9 +84,20 @@ async function addUserPathEntry(newPathEntry, invocationCommand) {
     console.error(err);
   }
 }
+
+function getFileName(filepath) {
+  if (fs.isDirectory(filepath)) {
+    return undefined;
+  } else {
+    return filepath.slice(filepath.lastIndexOf("\\") + 1, filepath.length);
+  }
+}
+
 export default {
   ...fs,
+  exec,
   copyFileSync,
   copyFolderRecursiveSync,
-  addUserPathEntry
+  addUserPathEntry,
+  getFileName
 };
