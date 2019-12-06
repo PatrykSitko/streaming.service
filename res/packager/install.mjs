@@ -5,7 +5,7 @@ import { dirname } from "path";
 
 const homeDir = process.env.HOMEDRIVE + process.env.HOMEPATH;
 const __dirname = dirname(fileURLToPath(import.meta.url));
-installPackager();
+
 export async function installPackager() {
   const startPackagerInstallation = await question.yesNoQuestion(
     "Do you want to start the packager installation process?"
