@@ -68,7 +68,9 @@ export const availableQualities = Object.freeze({
  * Object{
       success: true,
       inputfile:string,
+      inputfileLocation:string,
       outputFile:string,
+      outputFileLocation:string,
       choosenQuality:string
     }   
  * 
@@ -77,7 +79,9 @@ export const availableQualities = Object.freeze({
     Object{
       success: false,
       inputfile:string,
+      inputfileLocation:string,
       outputFile:string,
+      outputFileLocation:string,
       choosenQuality:string
     }
  */
@@ -177,7 +181,6 @@ function containsIllegalCrawlingErrors(
   } catch (illegalCrawlingError) {
     console.error(illegalCrawlingError);
     return true;
-  } finally {
-    return false;
   }
+  return false;
 }
