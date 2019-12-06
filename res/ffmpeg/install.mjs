@@ -1,5 +1,6 @@
 import fs from "../../src/customFS.mjs";
 import util from "util";
+import question from "../../src/questions.mjs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import child_process from "child_process";
@@ -7,62 +8,20 @@ import child_process from "child_process";
 const homeDir = process.env.HOMEDRIVE + process.env.HOMEPATH;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exec = util.promisify(child_process.exec);
-const stdin = process.stdin;
-stdin.setRawMode(true);
-stdin.setEncoding("UTF-8");
-
-export function installFFMPEG() {
-  console.log("Do you want to start the ffmpeg installation process?");
-  console.log("yes/no");
-  let choosenOption = false;
-  stdin.on("data", async key => {
-    console.log(key);
-    if (key.toLowerCase() === "y" && !choosenOption) {
-      choosenOption = true;
-      copyFfmpegToHomeDir();
-      addFfmpegPathEntry();
-    }
-    if (key.toLowerCase() === "n" && !choosenOption) {
-      choosenOption = true;
-      console.log("Missing ffmpeg. Exiting process with code 1.");
-      continueOnInput(1);
-    }
-  });
+installFFMPEG();
+export async function installFFMPEG() {
+  const startFFMPEGInstallation = await question.yesNoQuestion(
+    "Do you want to start the ffmpeg installation process?"
+  );
+  if (startFFMPEGInstallation) {
+    copyFfmpegToHomeDir();
+    addFfmpegPathEntry();
+  } else {
+    console.log("Missing ffmpeg. Exiting process with code 1.");
+    await question.continueOnInput(1);
+  }
 }
 
-function continueOnInput(exitcode = undefined) {
-  console.log("Press any key to continue...");
-  stdin.on("data", () => {
-    if (typeof exitcode === "number" && exitcode === 1) {
-      process.exit(1);
-    } else {
-      stdin.destroy();
-    }
-  });
-}
-function askToReboot() {
-  console.log("Do you want to reboot? (required)");
-  console.log("yes/no");
-  let choosenOption = false;
-  stdin.on("data", key => {
-    if (key && choosenOption) {
-      stdin.destroy();
-    }
-    console.log(key);
-    if (key.toLowerCase() === "y" && !choosenOption) {
-      (async () => {
-        const { stdout } = await exec("shutdown /r");
-        console.log(stdout);
-      })();
-      choosenOption = true;
-    }
-    if (key.toLowerCase() === "n") {
-      console.log("Please reboot your computer");
-      choosenOption = true;
-    }
-    console.log("Press any key to continue...");
-  });
-}
 function copyFfmpegToHomeDir() {
   console.log("Starting ffmpeg installation process...");
   console.log(
@@ -90,7 +49,7 @@ async function addFfmpegPathEntry() {
       const { stdout } = await exec(`setx path "${localPath}${newPathEntry}"`);
       console.log(stdout);
       console.log("Finnished adding new user path entry: " + newPathEntry);
-      askToReboot();
+      await question.askToReboot();
     } else {
       console.log("UserPath already contains path: " + newPathEntry);
       console.log("Abording adding new user path entry.");
@@ -104,10 +63,10 @@ async function addFfmpegPathEntry() {
         ) {
           console.log("Command:", stderr.trim());
           console.log("path variable need to be updated.");
-          askToReboot();
+          await question.askToReboot();
         }
       }
-      continueOnInput();
+      await question.continueOnInput();
     }
   } catch (err) {
     console.error(err);
