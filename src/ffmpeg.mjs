@@ -146,7 +146,7 @@ export async function createQualityVersion(
     );
     await ffmpegVideo.save(`"${outputFileLocation}"`);
   } catch (err) {
-    if (!isFfmpegInstalled()) {
+    if (!(await isFfmpegInstalled())) {
       console.log(
         "'ffmpeg' is not recognized as an internal or external command,\r\n" +
           "operable program or batch file.\r\n"
