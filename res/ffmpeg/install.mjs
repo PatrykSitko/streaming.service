@@ -6,7 +6,6 @@ import { dirname } from "path";
 const homeDir = process.env.HOMEDRIVE + process.env.HOMEPATH;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-installFFMPEG();
 export async function installFFMPEG() {
   const startFFMPEGInstallation = await question.yesNoQuestion(
     "Do you want to start the ffmpeg installation process?"
