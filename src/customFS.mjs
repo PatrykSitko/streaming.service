@@ -46,6 +46,7 @@ function copyFolderRecursiveSync(source, target) {
  *
  * @param newPathEntry The path entry you would like to add to the local user environment variables.
  * @param invocationCommand The command that will be used in the command-line to invoke the application that corresponds to the new path entry.
+ * @returns {Promise} true when adding new user path entry is terminated.
  */
 async function addUserPathEntry(newPathEntry, invocationCommand) {
   return new Promise(resolve=>{try {
@@ -63,7 +64,6 @@ async function addUserPathEntry(newPathEntry, invocationCommand) {
       console.log(stdout);
       console.log("Finnished adding new user path entry: " + newPathEntry);
       await question.askToReboot();
-      resolve(true);
     } else {
       console.log("UserPath already contains path: " + newPathEntry);
       console.log("Abording adding new user path entry.");
@@ -81,11 +81,9 @@ async function addUserPathEntry(newPathEntry, invocationCommand) {
         }
       }
       await question.continueOnInput();
-      resolve(true);
     }
   } catch (err) {
     console.error(err);
-    resolve(true);
   }
   resolve(true);
 });
