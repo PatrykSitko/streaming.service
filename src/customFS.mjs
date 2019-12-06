@@ -3,6 +3,7 @@ import util from "util";
 import path from "path";
 import question from "./questions.mjs";
 import child_process from "child_process";
+import { resolve } from "dns";
 
 const exec = util.promisify(child_process.exec);
 
@@ -47,7 +48,7 @@ function copyFolderRecursiveSync(source, target) {
  * @param invocationCommand The command that will be used in the command-line to invoke the application that corresponds to the new path entry.
  */
 async function addUserPathEntry(newPathEntry, invocationCommand) {
-  try {
+  return new Promise(resolve=>{try {
     const { stdout: userPath } = await exec(
       '%SystemRoot%\\System32\\reg.exe query "HKCU\\Environment" /v Path'
     );
@@ -62,6 +63,7 @@ async function addUserPathEntry(newPathEntry, invocationCommand) {
       console.log(stdout);
       console.log("Finnished adding new user path entry: " + newPathEntry);
       await question.askToReboot();
+      resolve(true);
     } else {
       console.log("UserPath already contains path: " + newPathEntry);
       console.log("Abording adding new user path entry.");
@@ -79,10 +81,15 @@ async function addUserPathEntry(newPathEntry, invocationCommand) {
         }
       }
       await question.continueOnInput();
+      resolve(true);
     }
   } catch (err) {
     console.error(err);
+    resolve(true);
   }
+  resolve(true);
+});
+  
 }
 
 function getFileName(filepath) {
