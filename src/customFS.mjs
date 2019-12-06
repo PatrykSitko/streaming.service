@@ -46,7 +46,7 @@ function copyFolderRecursiveSync(source, target) {
  */
 async function isCommandAvailable(command) {
   try {
-    await fs.exec(command);
+    await exec(command);
   } catch ({ stderr }) {
     if (
       stderr ===
