@@ -7,7 +7,6 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 
 import indexRouter from "./src/routes/index.mjs";
-import usersRouter from "./src/routes/users.mjs";
 import moviesRouter from "./src/routes/movies.mjs";
 import seriesRouter from "./src/routes/series.mjs";
 
@@ -22,7 +21,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "client/build")));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/series", seriesRouter);
 app.use("/movies", moviesRouter);
 
