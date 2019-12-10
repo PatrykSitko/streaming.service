@@ -107,21 +107,21 @@ export async function createQualityVersion(
   }
   const inputfileLocation = path.join(__project_path, inputfile);
   const outputFileLocation = path.join(__project_path, outputFile);
-  if (
-    containsIllegalCrawlingErrors(
-      { inputfile: inputfileLocation },
-      { outputfile: outputFileLocation }
-    )
-  ) {
-    return {
-      success: false,
-      inputfile,
-      inputfileLocation,
-      outputFile,
-      outputFileLocation,
-      choosenQuality: choosenQualityDescriptor
-    };
-  }
+  // if (
+  //   containsIllegalCrawlingErrors(
+  //     { inputfile: inputfileLocation },
+  //     { outputfile: outputFileLocation }
+  //   )
+  // ) {
+  //   return {
+  //     success: false,
+  //     inputfile,
+  //     inputfileLocation,
+  //     outputFile,
+  //     outputFileLocation,
+  //     choosenQuality: choosenQualityDescriptor
+  //   };
+  // }
   try {
     const ffmpegVideo = await new Ffmpeg(inputfileLocation);
     Object.entries(choosenQuality).forEach(([command, argument]) =>
@@ -157,28 +157,28 @@ export async function createQualityVersion(
   };
 }
 
-function containsIllegalCrawlingErrors(
-  object = { name: __project_path },
-  ...optionalParams
-) {
-  class IllegalCrawlingError extends Error {
-    constructor(attributeName) {
-      super(
-        `ffmpeg.mjs::import::createQualityVersion::param::${attributeName} is not located inside of the project_path. Please place the ${attributeName} inside of the project path.`
-      );
-    }
-  }
-  try {
-    Object.values(arguments).forEach(arg =>
-      Object.entries(arg).forEach(([name, value]) => {
-        if (!value.startsWith(__project_path)) {
-          throw new IllegalCrawlingError(name);
-        }
-      })
-    );
-  } catch (illegalCrawlingError) {
-    console.error(illegalCrawlingError);
-    return true;
-  }
-  return false;
-}
+// function containsIllegalCrawlingErrors(
+//   object = { name: __project_path },
+//   ...optionalParams
+// ) {
+//   class IllegalCrawlingError extends Error {
+//     constructor(attributeName) {
+//       super(
+//         `ffmpeg.mjs::import::createQualityVersion::param::${attributeName} is not located inside of the project_path. Please place the ${attributeName} inside of the project path.`
+//       );
+//     }
+//   }
+//   try {
+//     Object.values(arguments).forEach(arg =>
+//       Object.entries(arg).forEach(([name, value]) => {
+//         if (!value.startsWith(__project_path)) {
+//           throw new IllegalCrawlingError(name);
+//         }
+//       })
+//     );
+//   } catch (illegalCrawlingError) {
+//     console.error(illegalCrawlingError);
+//     return true;
+//   }
+//   return false;
+// }
