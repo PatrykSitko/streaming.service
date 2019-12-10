@@ -1,14 +1,15 @@
 import fs from "./customFS.mjs";
 import { installPackager as InstallPackager } from "../res/packager/install.mjs";
 import Ffmpeg, { installFFMPEG } from "./ffmpeg.mjs";
-
 import { flat } from "./polyfils.mjs";
+
 Array.prototype.flat = function() {
   return flat(this[0]);
 };
+
 export const installPackager = InstallPackager;
 
-class Packager {
+export default class Packager {
   constructor(verbose = false) {
     this.verbose = verbose;
     this.inputs = [];
@@ -25,20 +26,25 @@ class Packager {
   static get qualities() {
     return Object.freeze({ "720p": "720p", "540p": "540p", "360p": "360p" });
   }
-  input(file, packagerQualities = []) {
+  async input(file, packagerQualities = []) {
     packagerQualities = flat(packagerQualities);
     let passedCheck = true;
-    for (let packagerQuality of packagerQualities) {
-      if (!Object.values(Packager.qualities).includes(packagerQuality)) {
-        passedCheck = false;
-        throw new UnknownPackageQualityError(packagerQualities);
+    try {
+      for (let packagerQuality of packagerQualities) {
+        if (!Object.values(Packager.qualities).includes(packagerQuality)) {
+          passedCheck = false;
+          throw new UnknownPackageQualityError(packagerQualities);
+        }
       }
+    } catch (err) {
+      console.error(err);
     }
     if (passedCheck) {
-      const resolution = getResolution(file);
+      const resolution = await getResolution(file);
+      const fileName = await fs.getFileName(file);
       this.inputs.push({
         resolution,
-        fileName: fs.getFileName(file),
+        fileName,
         filePath: file
       });
       if (this.verbose) {
@@ -88,7 +94,70 @@ class Packager {
     if (!(await fs.isCommandAvailable("packager-win"))) {
       await installPackager();
     }
-    console.log(this.inputs);
+    if (this.inputs.length === 0) {
+      return;
+    }
+    let resolution = undefined;
+    let command = "packager-win ";
+    for (let {
+      resolution: { height },
+      fileName,
+      filePath
+    } of this.inputs) {
+      resolution = height;
+      const audioOutputFileName = fileName
+        .slice(0, fileName.indexOf("."))
+        .concat(`${height}_audio`)
+        .concat(fileName.slice(fileName.indexOf("."), fileName.length));
+      const videoOutputFileName = fileName
+        .slice(0, fileName.indexOf("."))
+        .concat(`${height}_video`)
+        .concat(fileName.slice(fileName.indexOf("."), fileName.length));
+      const audioOutput =
+        destination.lastIndexOf("\\") === destination.length - 1
+          ? destination.concat(audioOutputFileName)
+          : destination.concat(`\\${audioOutputFileName}`);
+      const videoOutput =
+        destination.lastIndexOf("\\") === destination.length - 1
+          ? destination.concat(videoOutputFileName)
+          : destination.concat(`\\${videoOutputFileName}`);
+      command = command.concat(
+        `input=${filePath},stream=audio,output=${audioOutput} input=${filePath},stream=video,output=${videoOutput}`
+      );
+    }
+    command = command.concat(` --profile ${this.choosenProfile}`);
+    command = command.concat(
+      ` --min_buffer_time ${this.choosenMinimumBufferTime}`
+    );
+    command = command.concat(
+      ` --segment_duration ${this.choosenSegmentDuration}`
+    );
+    if (this.inputs.length > 1) {
+      command = command.concat(
+        ` --mpd_output ${
+          destination.lastIndexOf("\\") === destination.length - 1
+            ? destination.concat("manifest-full.mpd")
+            : destination.concat(`\\manifest-full.mpd`)
+        }`
+      );
+    } else {
+      command = command.concat(
+        ` --mpd_output ${
+          destination.lastIndexOf("\\") === destination.length - 1
+            ? destination.concat(`manifest-${resolution}.mpd`)
+            : destination.concat(`\\manifest-${resolution}.mpd`)
+        }`
+      );
+    }
+    try {
+      const { stdout } = await fs.exec(command);
+      if (this.verbose) {
+        console.log(stdout);
+      }
+    } catch ({ stderr }) {
+      console.error(stderr);
+    }
+    this.inputs = [];
   }
 }
 async function getResolution(file) {
@@ -130,8 +199,3 @@ class UnknownPackageQualityError extends UnknownPackageError {
     super(objectValue, "Quality", "Packager.qualities;");
   }
 }
-const packager = new Packager("");
-packager.input(
-  "C:\\Users\\Patryk Sitko\\projecty\\streaming.service\\res\\video.mp4"
-);
-packager.save("packager1");
