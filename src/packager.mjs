@@ -151,7 +151,9 @@ export default class Packager {
     }
     try {
       const { stdout } = await fs.exec(command);
-      console.log(stdout);
+      if (this.verbose) {
+        console.log(stdout);
+      }
     } catch ({ stderr }) {
       console.error(stderr);
     }
