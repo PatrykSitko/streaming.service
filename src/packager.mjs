@@ -9,7 +9,7 @@ Array.prototype.flat = function() {
 
 export const installPackager = InstallPackager;
 
-class Packager {
+export default class Packager {
   constructor(verbose = false) {
     this.verbose = verbose;
     this.inputs = [];
