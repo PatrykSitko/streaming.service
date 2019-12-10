@@ -9092,6 +9092,11 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
+shaka-player@^2.5.6:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/shaka-player/-/shaka-player-2.5.6.tgz#1397ffdee9d60fa50c13cda6d584da5228b4607f"
+  integrity sha512-z1BM/kpg5OVk57w5gXYBGk78Le04gfCHBOpT106Nz7h4VU7im7o8ZldUKxC9+FlSL4sPvdU8lY6OxL7L3hw5Fw==
+
 shallow-clone@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/shallow-clone/-/shallow-clone-0.1.2.tgz#5909e874ba77106d73ac414cfec1ffca87d97060"
