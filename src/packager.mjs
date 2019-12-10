@@ -25,7 +25,7 @@ class Packager {
   static get qualities() {
     return Object.freeze({ "720p": "720p", "540p": "540p", "360p": "360p" });
   }
-  input(file, packagerQualities = []) {
+  async input(file, packagerQualities = []) {
     packagerQualities = flat(packagerQualities);
     let passedCheck = true;
     for (let packagerQuality of packagerQualities) {
@@ -35,10 +35,11 @@ class Packager {
       }
     }
     if (passedCheck) {
-      const resolution = getResolution(file);
+      const resolution = await getResolution(file);
+      const fileName = await fs.getFileName(file);
       this.inputs.push({
         resolution,
-        fileName: fs.getFileName(file),
+        fileName,
         filePath: file
       });
       if (this.verbose) {
@@ -131,7 +132,5 @@ class UnknownPackageQualityError extends UnknownPackageError {
   }
 }
 const packager = new Packager("");
-packager.input(
-  "C:\\Users\\Patryk Sitko\\projecty\\streaming.service\\res\\video.mp4"
-);
+packager.input("C:\\Users\\maras\\desktop\\streaming.service\\res\\video.mp4");
 packager.save("packager1");
