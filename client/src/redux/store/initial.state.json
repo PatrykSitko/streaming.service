@@ -1,9 +1,7 @@
 {
-  "title": "Forever Young",
+  "title": "Streaming.Service",
   "state": {
-    "user": {
-      "gender": null
-    },
+    "movies": { "categories": [] },
     "mouse": {
       "down": false,
       "click": false,
