@@ -8,6 +8,7 @@ import mouseout from "./mouse/out";
 import mousewheel from "./mouse/wheel";
 import setMoviesCategories from "./set/movies/categories";
 import addMoviesCategories from "./add/movies/categories";
+import addMoviesCategoryTitles from "./add/movies/category/titles";
 
 export default {
   windowResized,
@@ -19,5 +20,6 @@ export default {
   mouseout,
   mousewheel,
   setMoviesCategories,
-  addMoviesCategories
+  addMoviesCategories,
+  addMoviesCategoryTitles
 };
