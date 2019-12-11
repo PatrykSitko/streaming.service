@@ -1,9 +1,11 @@
 import fs from "fs";
 import util from "util";
-import path from "path";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 import question from "./questions.mjs";
 import child_process from "child_process";
 
+const projectPath = path.join(dirname(fileURLToPath(import.meta.url)), "../");
 const exec = util.promisify(child_process.exec);
 
 function copyFileSync(source, target) {
@@ -123,5 +125,6 @@ export default {
   copyFolderRecursiveSync,
   isCommandAvailable,
   addUserPathEntry,
-  getFileName
+  getFileName,
+  projectPath
 };
