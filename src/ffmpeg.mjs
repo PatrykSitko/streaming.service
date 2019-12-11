@@ -1,13 +1,6 @@
 import Ffmpeg from "ffmpeg";
 import fs from "./customFS.mjs";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
 import { installFFMPEG as InstallFFMPEG } from "../res/ffmpeg/install.mjs";
-
-const __project_path = path.join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../"
-);
 
 export default Ffmpeg;
 
@@ -52,11 +45,6 @@ export const availableQualities = Object.freeze({
   })
 });
 
-// createQualityVersion(
-//   availableQualities["360p"],
-//   "res/video.mp4",
-//   "res/video-360p.mp4"
-// ).then(console.log);
 /**
  *
  * @param {Object} availableQualities_ use exported availableQualities object from ffmpeg.mjs.
@@ -105,8 +93,8 @@ export async function createQualityVersion(
       break;
     }
   }
-  const inputfileLocation = path.join(__project_path, inputfile);
-  const outputFileLocation = path.join(__project_path, outputFile);
+  const inputfileLocation = path.join(fs.projectPath, inputfile);
+  const outputFileLocation = path.join(fs.projectPath, outputFile);
   // if (
   //   containsIllegalCrawlingErrors(
   //     { inputfile: inputfileLocation },
@@ -158,7 +146,7 @@ export async function createQualityVersion(
 }
 
 // function containsIllegalCrawlingErrors(
-//   object = { name: __project_path },
+//   object = { name: fs.projectPath },
 //   ...optionalParams
 // ) {
 //   class IllegalCrawlingError extends Error {
@@ -171,7 +159,7 @@ export async function createQualityVersion(
 //   try {
 //     Object.values(arguments).forEach(arg =>
 //       Object.entries(arg).forEach(([name, value]) => {
-//         if (!value.startsWith(__project_path)) {
+//         if (!value.startsWith(fs.projectPath)) {
 //           throw new IllegalCrawlingError(name);
 //         }
 //       })
