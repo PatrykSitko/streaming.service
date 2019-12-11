@@ -6,6 +6,8 @@ export const MOUSE_MOVE = "MOUSE_MOVED";
 export const MOUSE_OVER = "MOUSE_OVER";
 export const MOUSE_OUT = "MOUSE_OUT";
 export const MOUSE_WHEEL = "MOUSE_WHEEL";
+export const SET_MOVIES_CATEGORIES = "MOVIES_CATEGORIES";
+export const ADD_MOVIES_CATEGORIES = "MOVIES_CATEGORIES";
 
 export default [
   WINDOW_RESIZED,
@@ -15,5 +17,7 @@ export default [
   MOUSE_MOVE,
   MOUSE_OVER,
   MOUSE_OUT,
-  MOUSE_WHEEL
+  MOUSE_WHEEL,
+  SET_MOVIES_CATEGORIES,
+  ADD_MOVIES_CATEGORIES
 ];
