@@ -7,6 +7,8 @@
 import app from "../app.mjs";
 import debugLib from "debug";
 import http from "http";
+import socketIO from "socket.io";
+import socketIOConnections from "../socketIO/connections.mjs";
 
 const debug = debugLib("streaming.service:server");
 /**
@@ -20,6 +22,7 @@ app.set("port", port);
  */
 
 const server = http.createServer(app);
+export const io = socketIO(server);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -83,4 +86,5 @@ function onListening() {
   const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
   console.log("http://localhost:" + port);
+  socketIOConnections.connect();
 }
