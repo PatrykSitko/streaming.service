@@ -8,7 +8,7 @@ import app from "../app.mjs";
 import debugLib from "debug";
 import http from "http";
 import socketIO from "socket.io";
-import socketIOConnections from "../socketIO/connections.mjs";
+import socketIOConnections from "../src/socketIO/connections.mjs";
 
 const debug = debugLib("streaming.service:server");
 /**

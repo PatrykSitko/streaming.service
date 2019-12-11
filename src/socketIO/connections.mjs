@@ -1,4 +1,4 @@
-import { io as socketIO } from "../bin/www.mjs";
+import { io as socketIO } from "../../bin/www.mjs";
 
 export default {
   connect: () => {
