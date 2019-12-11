@@ -121,6 +121,7 @@ async function getFileName(filepath) {
 export default {
   ...fs,
   exec,
+  path,
   copyFileSync,
   copyFolderRecursiveSync,
   isCommandAvailable,
