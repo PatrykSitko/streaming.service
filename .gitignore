@@ -40,8 +40,8 @@ bower_components
 build/Release
 
 # production
-/build
-/client/build
+/build/**
+/client/build/**
 
 # Dependency directories
 node_modules/
