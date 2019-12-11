@@ -6,11 +6,11 @@ import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Routes } from "./app/routes";
 import store from "./redux/store";
-import MenuBar from "./app/components/menuBar";
+import Header from "./app/components/header";
 
 ReactDOM.render(
   <Provider store={store}>
-    <MenuBar />
+    <Header />
     <Router history={browserHistory}>
       <Routes />
     </Router>
