@@ -1,1 +1,0 @@
-{"version":3,"sources":["menuBar.scss"],"names":[],"mappings":"AAEA,UACE,wBAHkC","file":"main.bcacd791.chunk.css","sourcesContent":["$backgroundColor: rgb(184, 203, 219);\r\n\r\n.menu-bar {\r\n  background-color: $backgroundColor;\r\n}\r\n"]}
