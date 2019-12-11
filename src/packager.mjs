@@ -1,6 +1,6 @@
 import fs from "./customFS.mjs";
 import { installPackager as InstallPackager } from "../res/packager/install.mjs";
-import Ffmpeg, { installFFMPEG } from "./ffmpeg.mjs";
+import Ffmpeg from "./_ffmpeg.mjs";
 import { flat } from "./polyfils.mjs";
 
 Array.prototype.flat = function() {
@@ -23,24 +23,18 @@ export default class Packager {
   static get profiles() {
     return Object.freeze({ "on-demand": "on-demand" });
   }
-  static get qualities() {
-    return Object.freeze({ "720p": "720p", "540p": "540p", "360p": "360p" });
-  }
-  async input(file, packagerQualities = []) {
-    packagerQualities = flat(packagerQualities);
+  async input(file) {
+    const resolution = await getResolution(file);
     let passedCheck = true;
     try {
-      for (let packagerQuality of packagerQualities) {
-        if (!Object.values(Packager.qualities).includes(packagerQuality)) {
-          passedCheck = false;
-          throw new UnknownPackageQualityError(packagerQualities);
-        }
+      if (!Object.keys(Ffmpeg.formats).includes(`${resolution.height}p`)) {
+        passedCheck = false;
+        throw new UnknownPackageQualityError(packagerQualities);
       }
     } catch (err) {
       console.error(err);
     }
     if (passedCheck) {
-      const resolution = await getResolution(file);
       const fileName = await fs.getFileName(file);
       this.inputs.push({
         resolution,
@@ -132,20 +126,21 @@ export default class Packager {
     command = command.concat(
       ` --segment_duration ${this.choosenSegmentDuration}`
     );
+    const manifestName = fileName.slice(0, fileName.indexOf("."));
     if (this.inputs.length > 1) {
       command = command.concat(
         ` --mpd_output ${
           destination.lastIndexOf("\\") === destination.length - 1
-            ? destination.concat("manifest-full.mpd")
-            : destination.concat(`\\manifest-full.mpd`)
+            ? destination.concat(`${manifestName}-full.mpd`)
+            : destination.concat(`\\${manifestName}-full.mpd`)
         }`
       );
     } else {
       command = command.concat(
         ` --mpd_output ${
           destination.lastIndexOf("\\") === destination.length - 1
-            ? destination.concat(`manifest-${resolution}.mpd`)
-            : destination.concat(`\\manifest-${resolution}.mpd`)
+            ? destination.concat(`${manifestName}-${resolution}.mpd`)
+            : destination.concat(`\\${manifestName}-${resolution}.mpd`)
         }`
       );
     }
@@ -199,3 +194,9 @@ class UnknownPackageQualityError extends UnknownPackageError {
     super(objectValue, "Quality", "Packager.qualities;");
   }
 }
+
+const packager = new Packager(true);
+packager.input(`${fs.projectPath}\\res\\movies\\anime\\720p\\naruto.mp4`);
+packager.input(`${fs.projectPath}\\res\\movies\\anime\\540p\\naruto.mp4`);
+packager.input(`${fs.projectPath}\\res\\movies\\anime\\360p\\naruto.mp4`);
+packager.save(`${fs.projectPath}\\res\\movies\\anime\\manifests`);
