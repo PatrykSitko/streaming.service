@@ -1,6 +1,9 @@
 {
   "title": "Streaming.Service",
   "state": {
+    "user": {
+      "language": "en"
+    },
     "movies": { "categories": [] },
     "mouse": {
       "down": false,
