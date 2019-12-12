@@ -110,8 +110,15 @@ function addUserPathEntry(newPathEntry, invocationCommand) {
   });
 }
 
-async function getFileName(filepath) {
-  if ((await fs.promises.lstat(filepath)).isDirectory()) {
+async function getFileName(filePath) {
+  let filepath = filePath;
+  if (filepath.includes(projectPath)) {
+    filepath = filePath.replace(projectPath, "");
+  }
+  while (filepath.includes("'")) {
+    filepath = filepath.replace("'", "");
+  }
+  if ((await fs.promises.lstat(`${filepath}`)).isDirectory()) {
     return undefined;
   } else {
     return filepath.slice(filepath.lastIndexOf("\\") + 1, filepath.length);
