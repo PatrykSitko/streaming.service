@@ -1,5 +1,10 @@
 import fs from "./customFS.mjs";
 import { installFFMPEG as InstallFFMPEG } from "../res/ffmpeg/install.mjs";
+import { flat } from "./polyfils.mjs";
+
+Array.prototype.flat = function() {
+  return flat(this[0]);
+};
 
 const formatCollection = {
   "720p": Object.freeze({
@@ -40,13 +45,6 @@ const formatCollection = {
   })
 };
 
-async function getVideoMetadata(inputFilePath) {
-  const token = /^[0-9,A-Z]{32}$/;
-  const { stderr } = await fs.exec(
-    `ffprobe -i "C:\\Users\\Patryk Sitko\\projecty\\streaming.service\\res\\movies\\anime\\720p\\naruto.mp4"`
-  );
-  return stderr;
-}
 export default class Ffmpeg {
   constructor(inputFilePath, verbose = false) {
     this.inputfile = inputFilePath;
@@ -157,7 +155,148 @@ const ffmpegVideo = new Ffmpeg(
   true
 );
 (async () => {
-  console.log(await ffmpegVideo.metadata);
+  await ffmpegVideo.metadata;
   ffmpegVideo.addExistingFormat(Ffmpeg.formats["360p"]);
-  console.log(await ffmpegVideo.save(`${fs.projectPath}temp\\naruto.mp4`));
+  //   console.log(await ffmpegVideo.save(`${fs.projectPath}temp\\naruto.mp4`));
 })();
+const metadataKeys = [
+  "configuration:",
+  "libavutil",
+  "libavcodec",
+  "libavformat",
+  "libavdevice",
+  "libavfilter",
+  "libswscale",
+  "libswresample",
+  "libpostproc"
+];
+
+async function metadataBuilder(ffmpegMetadata) {
+  console.log(ffmpegMetadata);
+  let rawMetadata = ffmpegMetadata.replace(
+    "ffprobe version 4.2.1 Copyright (c) 2007-2019 the FFmpeg developers\r\n  built with gcc 9.1.1 (GCC) 20190807\r\n",
+    ""
+  );
+  const buildedMetadata = {};
+  for (let parameter of metadataKeys) {
+    const key = parameter.replace(":", "");
+    const [extractedMetadata, newRawMetadata] = extractMetadata(
+      rawMetadata,
+      parameter
+    );
+    buildedMetadata[key] = extractedMetadata;
+    rawMetadata = newRawMetadata;
+  }
+  for (let inputCode = 0; ; inputCode++) {
+    const parameter = `Input #${inputCode}`;
+    const inputCodeKey = parameter.replace(" #", "");
+    if (!rawMetadata.includes(parameter)) {
+      break;
+    }
+    let [metadata, newRawMetadata] = extractMetadata(rawMetadata, parameter);
+    if (
+      metadata &&
+      metadata.constructor &&
+      metadata.constructor.name === "Array"
+    ) {
+      let filePath = undefined;
+      let fileName = undefined;
+      let formats = undefined;
+      for (let index = 0; index < metadata.length; index++) {
+        if (metadata[index].includes("from")) {
+          filePath = metadata[index]
+            .slice(5, metadata[index].length - 1)
+            .trim();
+          fileName = await fs.getFileName(filePath);
+          formats = metadata.filter(entry => entry !== metadata[index]);
+        } else if (!filePath) {
+          formats = metadata;
+        }
+      }
+      buildedMetadata[inputCodeKey] = {
+        filePath,
+        fileName,
+        formats,
+        format: fileName.slice(fileName.indexOf(".") + 1, fileName.length)
+      };
+    }
+    rawMetadata = newRawMetadata;
+    [metadata, newRawMetadata] = extractMetadata(
+      rawMetadata,
+      "Metadata:",
+      "Stream #",
+      "\r\n"
+    );
+    let inputMetadata = [];
+    for (let data of metadata) {
+      if (!data.includes("Duration:")) {
+        inputMetadata = [...inputMetadata, data.replace("\r\n").split(":")];
+      } else {
+        const duration = data.replace("Duration:", "").split(",");
+        inputMetadata = [...inputMetadata, ["Duration", duration[0]]];
+        metadata.push(duration[1]);
+        metadata.push(duration[2]);
+      }
+      buildedMetadata[inputCodeKey].metadata = {};
+      for (let [key, value] of inputMetadata) {
+        buildedMetadata[inputCodeKey]["metadata"][key.trim()] =
+          typeof value.trim === "function"
+            ? value.trim()
+            : value.map
+            ? value.map(entry => (entry.trim ? entry.trim() : entry))
+            : value;
+      }
+      rawMetadata = newRawMetadata;
+      //   console.log(inputMetadata);
+    }
+    // console.log(metadata, newRawMetadata);
+  }
+  console.log(buildedMetadata, [rawMetadata]);
+  //   return buildedMetadata;
+}
+/**
+ *
+ * @param {String} rawMetadata the metadata from where the parameter has to be extracted.
+ * @param {String} parameter the parameter that has to be extracted from the rawMetadata.
+ * @returns {Array} [extractedMetadata,newRawMetadata];
+ */
+function extractMetadata(
+  rawMetadata,
+  parameter,
+  cut = "\r\n",
+  splittingSymbol = ","
+) {
+  let extractedMetadata = rawMetadata
+    .slice(
+      rawMetadata.indexOf(parameter) + parameter.length,
+      rawMetadata.indexOf(cut)
+    )
+    .trim();
+  const newRawMetadata = rawMetadata
+    .replace(`${parameter}`, "")
+    .replace(`${extractedMetadata}`, "")
+    .trim();
+  extractedMetadata = extractedMetadata.includes("--")
+    ? extractedMetadata.split("--").join()
+    : extractedMetadata;
+  while (extractedMetadata.includes(" ,")) {
+    extractedMetadata = extractedMetadata.replace(" ,", ",");
+  }
+  if (extractedMetadata.includes(splittingSymbol)) {
+    extractedMetadata = extractedMetadata.split(splittingSymbol);
+  }
+  if (
+    extractedMetadata &&
+    extractedMetadata.constructor &&
+    extractedMetadata.constructor.name === "Array"
+  ) {
+    extractedMetadata = extractedMetadata.filter(value => value !== "");
+  }
+  return [extractedMetadata, newRawMetadata];
+}
+async function getVideoMetadata(inputFilePath) {
+  const { stderr: rawMetadata } = await fs.exec(
+    `ffprobe -i "C:\\Users\\Patryk Sitko\\projecty\\streaming.service\\res\\movies\\anime\\720p\\naruto.mp4"`
+  );
+  return metadataBuilder(rawMetadata);
+}
