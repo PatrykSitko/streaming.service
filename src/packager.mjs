@@ -1,6 +1,6 @@
 import fs from "./customFS.mjs";
 import { installPackager as InstallPackager } from "../res/packager/install.mjs";
-import Ffmpeg from "./_ffmpeg.mjs";
+import Ffmpeg from "./ffmpeg.mjs";
 import { flat } from "./polyfils.mjs";
 
 Array.prototype.flat = function() {
@@ -23,7 +23,7 @@ export default class Packager {
   static get profiles() {
     return Object.freeze({ "on-demand": "on-demand" });
   }
-  async input(file) {
+  async input(file, outputPath = undefined, concatResolution = true) {
     const resolution = await getResolution(file);
     let passedCheck = true;
     try {
@@ -39,7 +39,9 @@ export default class Packager {
       this.inputs.push({
         resolution,
         fileName,
-        filePath: file
+        filePath: file,
+        outputPath,
+        concatResolution
       });
       if (this.verbose) {
         console.log(`Added input file: ${file}.`);
@@ -93,31 +95,44 @@ export default class Packager {
     }
     let resolution = undefined;
     let command = "packager-win ";
+    let manifestName = "";
     for (let {
       resolution: { height },
       fileName,
-      filePath
+      filePath,
+      outputPath,
+      concatResolution
     } of this.inputs) {
+      const outputDestination = outputPath ? outputPath : destination;
+      filePath =
+        filePath.includes(" ") && !filePath.indexOf('"') !== 0
+          ? `"${filePath}"`
+          : filePath;
       resolution = height;
       const audioOutputFileName = fileName
         .slice(0, fileName.indexOf("."))
-        .concat(`${height}_audio`)
+        .concat(concatResolution ? `${height}_audio` : "_audio")
         .concat(fileName.slice(fileName.indexOf("."), fileName.length));
       const videoOutputFileName = fileName
         .slice(0, fileName.indexOf("."))
-        .concat(`${height}_video`)
+        .concat(concatResolution ? `${height}_video` : "_video")
         .concat(fileName.slice(fileName.indexOf("."), fileName.length));
       const audioOutput =
-        destination.lastIndexOf("\\") === destination.length - 1
-          ? destination.concat(audioOutputFileName)
-          : destination.concat(`\\${audioOutputFileName}`);
+        outputDestination.lastIndexOf("\\") === outputDestination.length - 1
+          ? outputDestination.concat(audioOutputFileName)
+          : outputDestination.concat(`\\${audioOutputFileName}`);
       const videoOutput =
-        destination.lastIndexOf("\\") === destination.length - 1
-          ? destination.concat(videoOutputFileName)
-          : destination.concat(`\\${videoOutputFileName}`);
+        outputDestination.lastIndexOf("\\") === outputDestination.length - 1
+          ? outputDestination.concat(videoOutputFileName)
+          : outputDestination.concat(`\\${videoOutputFileName}`);
       command = command.concat(
-        `input=${filePath},stream=audio,output=${audioOutput} input=${filePath},stream=video,output=${videoOutput}`
+        `input=${filePath},stream=audio,output=${
+          audioOutput.includes(" ") ? `"${audioOutput}"` : audioOutput
+        } input=${filePath},stream=video,output=${
+          videoOutput.includes(" ") ? `"${videoOutput}"` : videoOutput
+        } `
       );
+      manifestName = fileName.slice(0, fileName.indexOf("."));
     }
     command = command.concat(` --profile ${this.choosenProfile}`);
     command = command.concat(
@@ -126,25 +141,27 @@ export default class Packager {
     command = command.concat(
       ` --segment_duration ${this.choosenSegmentDuration}`
     );
-    const manifestName = fileName.slice(0, fileName.indexOf("."));
     if (this.inputs.length > 1) {
       command = command.concat(
         ` --mpd_output ${
           destination.lastIndexOf("\\") === destination.length - 1
-            ? destination.concat(`${manifestName}-full.mpd`)
-            : destination.concat(`\\${manifestName}-full.mpd`)
+            ? `"${destination.concat(`${manifestName}-full.mpd`)}"`
+            : `"${destination.concat(`\\${manifestName}-full.mpd`)}"`
         }`
       );
     } else {
       command = command.concat(
         ` --mpd_output ${
           destination.lastIndexOf("\\") === destination.length - 1
-            ? destination.concat(`${manifestName}-${resolution}.mpd`)
-            : destination.concat(`\\${manifestName}-${resolution}.mpd`)
+            ? `"${destination.concat(`${manifestName}-${resolution}.mpd`)}"`
+            : `"${destination.concat(`\\${manifestName}-${resolution}.mpd`)}"`
         }`
       );
     }
     try {
+      if (this.verbose) {
+        console.log(command);
+      }
       const { stdout } = await fs.exec(command);
       if (this.verbose) {
         console.log(stdout);
@@ -158,13 +175,9 @@ export default class Packager {
 async function getResolution(file) {
   try {
     const {
-      metadata: {
-        video: {
-          resolution: { w: width, h: height }
-        }
-      }
-    } = await new Ffmpeg(file);
-    return { width, height };
+      resolution: { w, h }
+    } = (await new Ffmpeg(file).metadata)["Input0"].metadata;
+    return { width: w, height: h };
   } catch (ffmpegError) {
     console.error(ffmpegError);
     return undefined;
@@ -195,8 +208,20 @@ class UnknownPackageQualityError extends UnknownPackageError {
   }
 }
 
-const packager = new Packager(true);
-packager.input(`${fs.projectPath}\\res\\movies\\anime\\720p\\naruto.mp4`);
-packager.input(`${fs.projectPath}\\res\\movies\\anime\\540p\\naruto.mp4`);
-packager.input(`${fs.projectPath}\\res\\movies\\anime\\360p\\naruto.mp4`);
-packager.save(`${fs.projectPath}\\res\\movies\\anime\\manifests`);
+const packager = new Packager();
+packager.input(
+  `${fs.projectPath}res\\movies\\anime\\720p\\naruto.mp4`,
+  `${fs.projectPath}res\\movies\\anime\\720p`,
+  false
+);
+packager.input(
+  `${fs.projectPath}res\\movies\\anime\\540p\\naruto.mp4`,
+  `${fs.projectPath}res\\movies\\anime\\540p`,
+  false
+);
+packager.input(
+  `${fs.projectPath}res\\movies\\anime\\360p\\naruto.mp4`,
+  `${fs.projectPath}res\\movies\\anime\\360p`,
+  false
+);
+packager.save(`${fs.projectPath}res\\movies\\anime\\manifests`);
